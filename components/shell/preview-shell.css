@@ -1,5 +1,5 @@
 /*
- * Walk the Pitch pre-signup preview (app/preview/) — stands in for the real
+ * The Warm-Up pre-signup preview (app/preview/) — stands in for the real
  * Navbar, which needs a real account (search, Get Verified, the account
  * menu). Same stacking/height as .atlas-navbar so the layout reads the same
  * with either one in the slot.

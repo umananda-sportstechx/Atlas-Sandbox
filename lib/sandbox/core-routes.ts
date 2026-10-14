@@ -77,6 +77,7 @@ interface SlimCompany {
 	website: string | null; custom_logo_url: string | null;
 	primary_sector: string | null; hq_city: string | null; hq_country: string | null;
 	total_funding_usd: number | string | null;
+	latest_round?: string | null; founded_year?: number | null; business_model?: string | null;
 }
 
 /** Both products' fallback company lists, by id — `/companies/:slug` passes an
@@ -99,13 +100,13 @@ function findFallbackCompany(id: string): SlimCompany | undefined {
 function expandCompany(c: SlimCompany): Record<string, unknown> {
 	return {
 		id: c.id, name: c.name, website: c.website, slug: c.slug, custom_logo_url: c.custom_logo_url,
-		description: c.description, status: 'active', founded_year: null, ipo_date: null, sector_id: null,
-		business_model: null, location_id: null, social_profile_id: null, is_verified: true, is_unicorn: false,
+		description: c.description, status: 'active', founded_year: c.founded_year ?? null, ipo_date: null, sector_id: null,
+		business_model: c.business_model ?? null, location_id: null, social_profile_id: null, is_verified: true, is_unicorn: false,
 		is_actively_raising: false, poc_first_name: null, poc_last_name: null, poc_job_position: null,
 		poc_email: null, poc_linkedin: null, accelerator: null, cohort: null, added_by_profile_id: null,
 		created_at: daysFromNow(-900), updated_at: daysFromNow(-14),
 		primary_sector: c.primary_sector, primary_sector_slug: null, hq_city: c.hq_city, hq_country: c.hq_country,
-		primary_sport: null, total_funding_usd: Number(c.total_funding_usd) || 0,
+		primary_sport: null, total_funding_usd: Number(c.total_funding_usd) || 0, last_round_type: c.latest_round ?? null,
 		hq_region: null, twitter_url: null, instagram_url: null, facebook_url: null, linkedin_url: null,
 		youtube_url: null, contact_email: null, sport_count: 0, tech_tag_count: 0, deal_count: 0,
 	};
@@ -125,12 +126,13 @@ function sampleSignals(c: SlimCompany): Record<string, unknown>[] {
 
 /** "Related companies" — the other fallback companies, same reasoning. */
 function sampleSimilar(c: SlimCompany): Record<string, unknown>[] {
-	return [...FALLBACK_WATCHLIST_COMPANIES, ...FALLBACK_SCOUT_COMPANIES]
+	const pool: SlimCompany[] = [...FALLBACK_WATCHLIST_COMPANIES, ...FALLBACK_SCOUT_COMPANIES];
+	return pool
 		.filter((o) => o.id !== c.id)
 		.slice(0, 3)
 		.map((o) => ({
 			id: o.id, name: o.name, slug: o.slug, hq_city: o.hq_city, hq_country: o.hq_country,
-			last_round_type: 'Seed', primary_sector: o.primary_sector,
+			last_round_type: o.latest_round ?? 'Seed', primary_sector: o.primary_sector,
 		}));
 }
 

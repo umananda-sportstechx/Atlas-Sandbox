@@ -8,6 +8,8 @@
  */
 
 import type { ShellNavEntry, ShellNavItem } from '@/components/atlas/shell/nav';
+// Relative + `.ts`: a value import, and `npm run check` runs this file under plain node.
+import { navTourId } from '../components/atlas/shell/nav.ts';
 import { access, type Tier } from './access.ts';
 import { NAV_LAYOUT, ROUTE_BY_ID, forTier, pathOf, type RouteDef } from './routes.ts';
 
@@ -94,7 +96,8 @@ export function buildNav(tier: Tier, isAdmin: boolean, lists: NavWatchlist[] = [
 		// just "All watchlists"). Render it as a plain top-level item, the way
 		// the heading-less Home group already renders. The section reappears the
 		// moment a second item does (a saved list splices in above the anchor).
-		if (sectionItems.length === 1) { nav.push(sectionItems[0]); continue; }
+		// It keeps the section's tour anchor, so a tour can still point at "Watchlists".
+		if (sectionItems.length === 1) { nav.push({ ...sectionItems[0], tour: navTourId(group.title) }); continue; }
 		nav.push({ title: group.title, items: sectionItems });
 	}
 

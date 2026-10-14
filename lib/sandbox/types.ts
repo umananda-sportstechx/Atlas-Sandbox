@@ -1,5 +1,5 @@
 /**
- * Walk the Pitch practice — shared types for the request interceptor.
+ * The Warm-Up practice — shared types for the request interceptor.
  *
  * In practice the browser's fetch is wrapped: requests whose path matches a
  * SandboxRoute are answered locally (sample data, gated actions), everything

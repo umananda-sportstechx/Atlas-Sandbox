@@ -85,7 +85,7 @@ export function ExploreHome() {
 			<section className="explore-home__attn">
 				<SectionHead title="What needs your attention" meta="Based on your interests · updated today" />
 				<div className="atlas-feed-grid">
-					{/* Walk the Pitch: guided practice of Raise / Scout (first-visit chooser + this card). */}
+					{/* The Warm-Up: guided practice of Raise / Scout (first-visit chooser + this card). */}
 					<WalkthroughHomeEntry />
 					{latestNews && (
 						<FeedCard tag="Newsletter" icon={Newspaper} title={latestNews.title} body={`${fmt(latestNews.pubDate)} · ${latestNews.description}`} href={hrefOf('newsletter')} actionLabel="Read" />

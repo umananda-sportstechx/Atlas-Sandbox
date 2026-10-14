@@ -1,35 +1,49 @@
 /*
- * Walk the Pitch: coach panel, spotlight, practice bar, entry buttons.
- * Atlas tokens only. The coach, spotlight and bar render inside the shell's
+ * The Warm-Up: coach panel, dim + highlight, confirmation, practice bar, entry buttons.
+ * Atlas tokens only. The coach, dim, highlight and bar render inside the shell's
  * `.atlas` scope; `.wt-try` can also appear outside it (post-signup plan
  * chooser), hence the var() fallbacks on that one rule set.
  */
 
-/* ── Spotlight: glowing ring on the target, everything else dimmed ────────── */
-.atlas .wt-spotlight {
-	position: fixed; z-index: 140; pointer-events: none;
-	border-radius: var(--a-radius-sm);
+/* ── Dim + highlight: the page dimmed, each highlighted element cut out of the
+   dim with a border and a soft pulsing glow. Neither catches clicks — the
+   coach's guard (use-tour-guard.ts) decides what is interactive. ─────────── */
+.atlas .wt-dim { position: fixed; inset: 0; z-index: 140; pointer-events: none; }
+.atlas .wt-dim__fill { fill: color-mix(in srgb, var(--a-ink) 42%, transparent); }
+.atlas .wt-ring {
+	/* Above menus and popovers (the option a step allows lives in one), below nothing that catches clicks. */
+	position: fixed; z-index: 2100; pointer-events: none;
+	border-radius: 8px;
 	box-shadow:
 		0 0 0 2px var(--a-primary),
-		0 0 0 6px color-mix(in srgb, var(--a-primary) 14%, transparent),
-		0 0 24px 2px color-mix(in srgb, var(--a-primary) 35%, transparent),
-		0 0 0 9999px color-mix(in srgb, var(--a-page) 45%, transparent);
+		0 0 0 6px color-mix(in srgb, var(--a-primary) 16%, transparent),
+		0 0 26px 4px color-mix(in srgb, var(--a-primary) 38%, transparent);
 	transition: top 0.18s ease, left 0.18s ease, width 0.18s ease, height 0.18s ease;
 	animation: wt-pulse 1.8s ease-in-out infinite;
 }
 @keyframes wt-pulse {
-	0%, 100% { outline: 2px solid transparent; }
-	50% { outline: 2px solid color-mix(in srgb, var(--a-primary) 55%, transparent); outline-offset: 4px; }
+	0%, 100% { outline: 2px solid transparent; outline-offset: 2px; }
+	50% { outline: 2px solid color-mix(in srgb, var(--a-primary) 55%, transparent); outline-offset: 6px; }
 }
+@media (prefers-reduced-motion: reduce) { .atlas .wt-ring { animation: none; transition: none; } }
 
-/* ── Pointer: a drawn line from the panel's edge out to the target ────────── */
-.atlas .wt-pointer { position: fixed; inset: 0; z-index: 141; pointer-events: none; }
-.atlas .wt-pointer__line {
-	fill: none; stroke: var(--a-primary); stroke-width: 2.5; stroke-dasharray: 7 6; stroke-linecap: round;
-	animation: wt-pointer-flow 0.9s linear infinite;
+/* The practice bar (Exit) and the preview's "Get Atlas X" stay above the dim — they always work. */
+.atlas .wt-bar, .atlas .wt-preview-bar { position: relative; z-index: 142; }
+
+/* ── Simulated confirmation: a card over the dimmed page, beside the panel ── */
+.atlas .wt-confirm {
+	position: fixed; z-index: 146; inset: 0 var(--wt-panel-w) 0 0;
+	display: grid; place-items: center; padding: 24px; pointer-events: none;
 }
-.atlas .wt-pointer__head { fill: var(--a-primary); }
-@keyframes wt-pointer-flow { to { stroke-dashoffset: -26; } }
+.atlas .wt-confirm--left { inset: 0 0 0 var(--wt-panel-w); }
+.atlas .wt-confirm__card {
+	pointer-events: auto; display: grid; justify-items: start; gap: 12px; max-width: 420px; padding: 28px;
+	border-radius: var(--a-radius); border: 1px solid var(--a-border); background: var(--a-page); color: var(--a-ink);
+	box-shadow: 0 24px 60px color-mix(in srgb, var(--a-ink) 25%, transparent);
+}
+.atlas .wt-confirm__icon { color: var(--a-ok); }
+.atlas .wt-confirm__title { margin: 0; font-family: var(--a-font); font-size: 24px; font-weight: 700; line-height: 1.2; letter-spacing: -0.01em; }
+.atlas .wt-confirm__text { margin: 0 0 4px; font-family: var(--a-body); font-size: 14px; line-height: 1.6; color: var(--a-muted); }
 
 /* ── Coach panel: a persistent full-height column, docked right on desktop ──
    (bottom sheet on tablet/phone). The real app keeps running beside it — see
@@ -56,18 +70,18 @@
 .atlas .wt-coach__title--big { font-size: 27px; line-height: 1.15; letter-spacing: -0.01em; }
 .atlas .wt-coach__text { margin: 0; font-family: var(--a-body); font-size: 14px; line-height: 1.6; color: color-mix(in srgb, var(--a-primary-ink) 78%, transparent); }
 .atlas .wt-coach__text--lead { font-size: 16px; }
-.atlas .wt-coach__cue {
-	display: inline-flex; align-self: flex-start; align-items: center; gap: 7px; margin: 0; padding: 7px 14px;
-	border-radius: var(--a-radius-pill); background: color-mix(in srgb, var(--a-primary-ink) 14%, transparent);
-	font-family: var(--a-mono); font-size: 11px; letter-spacing: 0.04em; color: var(--a-primary-ink);
-}
+.atlas .wt-coach__points { display: grid; gap: 8px; margin: 0; }
+.atlas .wt-coach__points > div { display: grid; gap: 1px; padding-left: 10px; border-left: 2px solid color-mix(in srgb, var(--a-primary-ink) 30%, transparent); }
+.atlas .wt-coach__points dt { font-family: var(--a-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--a-primary-ink); }
+.atlas .wt-coach__points dd { margin: 0; font-family: var(--a-body); font-size: 13px; line-height: 1.5; color: color-mix(in srgb, var(--a-primary-ink) 78%, transparent); }
 .atlas .wt-coach__note { margin: 0; font-family: var(--a-body); font-size: 12px; line-height: 1.5; color: color-mix(in srgb, var(--a-primary-ink) 60%, transparent); }
 .atlas .wt-coach__actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
 .atlas .wt-coach__actions > :first-child { margin-right: auto; }
 .atlas .wt-coach__stack { display: grid; gap: 8px; margin-top: 4px; }
 .atlas .wt-coach__stack .atlas-btn { justify-content: center; }
 .atlas .wt-coach .atlas-btn--ghost { color: var(--a-primary-ink); }
-.atlas .wt-coach .atlas-btn--outline { border-color: color-mix(in srgb, var(--a-primary-ink) 35%, transparent); color: var(--a-primary-ink); }
+.atlas .wt-coach .atlas-btn--outline { background: transparent; border-color: color-mix(in srgb, var(--a-primary-ink) 35%, transparent); color: var(--a-primary-ink); }
+.atlas .wt-coach .atlas-btn--outline:hover:not(:disabled) { background: color-mix(in srgb, var(--a-primary-ink) 8%, transparent); }
 .atlas .wt-coach .atlas-btn--primary { background: var(--a-primary-ink); color: var(--a-primary); }
 .atlas .wt-coach__help {
 	align-self: flex-start; display: inline-flex; align-items: center; gap: 5px; padding-top: 14px; width: 100%;
@@ -96,7 +110,11 @@ body.wt-coach-open--left .atlas-shell { margin-left: var(--wt-panel-w); }
 	}
 	.atlas .wt-coach__body { justify-content: flex-start; }
 	.atlas .wt-coach__title--big { font-size: 22px; }
-	.atlas .wt-pointer { display: none; }
+	.atlas .wt-confirm, .atlas .wt-confirm--left { inset: 0 0 auto 0; padding-top: 72px; }
+	/* Room to scroll the last element on the page above the bottom-sheet coach. */
+	body.wt-coach-open .atlas-content { padding-bottom: 60vh; }
+	/* A target scrolled to the top stops below the sticky bars, not under them. */
+	body.wt-coach-open [data-tour] { scroll-margin-top: 150px; }
 }
 
 /* ── Practice bar (above the navbar while in practice) ────────────────────── */
@@ -119,7 +137,7 @@ body.wt-coach-open--left .atlas-shell { margin-left: var(--wt-panel-w); }
 .atlas .wt-bar__btn--solid { border-color: transparent; background: var(--a-primary-ink); color: var(--a-primary); }
 @media (max-width: 640px) { .atlas .wt-bar { padding: 8px 16px; } .atlas .wt-bar__text { display: none; } }
 
-/* ── Entry: "Walk the pitch →" pill (Plans page, plan chooser) ────────────── */
+/* ── Entry: "Try the Warm-Up →" pill (Plans page, plan chooser) ────────────── */
 .wt-try {
 	display: inline-flex; align-items: center; justify-content: center; gap: 7px; width: 100%; min-height: 34px; padding: 0 14px;
 	border-radius: var(--a-radius-pill, 35px); border: 1px dashed var(--a-border-strong, rgba(0,0,0,.25)); background: transparent; cursor: pointer;

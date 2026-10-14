@@ -27,7 +27,7 @@ function markSeen() {
 }
 
 /**
- * Walk the Pitch on Explore Home: a persistent card in "What needs your
+ * The Warm-Up on Explore Home: a persistent card in "What needs your
  * attention", plus the same chooser opened once on a first visit. Real Explore
  * users only, never inside practice.
  */
@@ -55,22 +55,22 @@ export function WalkthroughHomeEntry() {
 	return (
 		<>
 			<FeedCard
-				tag="Walk the Pitch"
+				tag="The Warm-Up"
 				icon={Footprints}
 				title="See Raise and Scout in action"
-				body="A five-minute guided run through a paid workspace on sample data. Nothing you do there touches your account."
+				body="A short guided demo of a paid workspace. Explore with sample data — your account isn’t changed."
 				onAction={() => setOpen(true)}
-				actionLabel="Walk the pitch"
+				actionLabel="Start the Warm-Up"
 			/>
 			<Modal
 				open={open}
 				onOpenChange={onOpenChange}
 				icon={<Footprints size={18} />}
-				title="New here? Walk the pitch"
+				title="New here? Try the Warm-Up"
 				width={480}
 				footer={<Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>Maybe later</Button>}
 			>
-				Take a short guided run through Atlas on sample data, then look around at your own pace. Which side of the table are you on?
+				Take a short guided warm-up through Atlas on sample data. Which side of the table are you on?
 				<div className="wt-choices">
 					{CHOICES.map((c) => (
 						<button key={c.product} type="button" className="wt-choice" onClick={() => choose(c.product)}>

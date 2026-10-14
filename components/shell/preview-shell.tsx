@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { AtlasShell } from '@/components/atlas';
 import { PracticeBar } from '@/components/features/walkthrough/practice-bar';
 import { usePracticeAccess } from '@/components/features/walkthrough/use-practice-access';
+import { PRODUCT_NAME, tourExpandsNav } from '@/components/features/walkthrough/tours';
 import { SCOUT_COLOR } from '@/components/scout/shell-config';
 import { TIER_LABEL } from '@/hooks/use-user-profile';
 import { buildNav } from '@/lib/nav';
@@ -21,11 +22,11 @@ const COLOR: Record<Tier, string | undefined> = { explore: undefined, raise: und
 /**
  * The real app frame (components/shell/app-shell.tsx), minus everything that
  * needs a real signed-in profile: no Navbar (search, account menu, sign out),
- * no RouteGate (entitlement by real tier), no upgrade cards. Walk the Pitch
+ * no RouteGate (entitlement by real tier), no upgrade cards. The Warm-Up
  * pre-signup (app/preview/) renders the exact same page components and the
  * exact same WalkthroughCoach inside this instead — "the whole app showing",
  * just with a static nav (one product, already known from the URL) and a
- * minimal topbar offering the one real action available: sign up for real.
+ * minimal topbar offering the one real action available: get the product.
  */
 export function PreviewShell({ product, children }: { product: Tier; children: React.ReactNode }) {
 	const { nav } = buildNav(product, false, [], 'nav-list');
@@ -42,12 +43,14 @@ export function PreviewShell({ product, children }: { product: Tier; children: R
 				<>
 					<PracticeBar />
 					<div className="wt-preview-bar">
-						<span className="wt-preview-bar__tag">Preview — not your real account</span>
-						<Link className="wt-preview-bar__cta" href="/signup">Sign up for real</Link>
+						<span className="wt-preview-bar__tag">Preview</span>
+						{/* `wt-allow`: stays usable while the tour blocks the rest of the page. */}
+						<Link className="wt-preview-bar__cta wt-allow" href="/signup">Get Atlas {product === 'scout' ? PRODUCT_NAME.scout : PRODUCT_NAME.raise}</Link>
 					</div>
 				</>
 			}
 			forceCollapsed={inPractice}
+			forceExpanded={inPractice && tourExpandsNav(practice)}
 			overlay={coach}
 		>
 			{children}

@@ -77,7 +77,7 @@ export function TierGate({ tier, feature }: {
 					<Link href={hrefOf('billing')} className="atlas-btn atlas-btn--primary">Get {p.name}</Link>
 					<Link href={LANDING} className="atlas-btn atlas-btn--outline">Talk to the team</Link>
 					{/* Guided practice run of this product on sample data (lib/sandbox); Explore users only. */}
-					<WalkthroughButton product={tier} source="tier-gate" label="Walk the pitch first" className="atlas-btn atlas-btn--ghost" />
+					<WalkthroughButton product={tier} source="tier-gate" label="Try the Warm-Up first" className="atlas-btn atlas-btn--ghost" />
 				</div>
 			</section>
 			<section className="atlas-card tier-gate__about">

@@ -75,7 +75,7 @@ export function SaveToWatchlist({ companyId, companyName, 'data-tour': dataTour 
 						{shown.map((l) => {
 							const on = ids.includes(l.id);
 							return (
-								<button key={l.id} type="button" className={cx('atlas-menu__item', 'atlas-menu__item--plain', on && 'on')} aria-pressed={on} disabled={busy !== null} onClick={() => void toggle(l.id, l.name)}>
+								<button key={l.id} type="button" data-watchlist-id={l.id} className={cx('atlas-menu__item', 'atlas-menu__item--plain', on && 'on')} aria-pressed={on} disabled={busy !== null} onClick={() => void toggle(l.id, l.name)}>
 									<span className="atlas-wl-check" aria-hidden="true">{busy === l.id ? <Loader2 className="animate-spin" size={10} /> : on ? <Check size={10} /> : null}</span>
 									<span className="atlas-switcher__name">{l.name}</span>
 									{l.company_count != null && <span className="atlas-switcher__meta">{l.company_count}</span>}

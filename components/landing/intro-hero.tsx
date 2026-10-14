@@ -51,7 +51,7 @@ export function IntroHero() {
 				</div>
 				<div className="lp-hero-ctas">
 					<Link className="lp-btn lp-btn--pink" href="/signup">Book a demo</Link>
-					<Link className="lp-btn lp-btn--outline" href="/preview">Walk the Pitch</Link>
+					<Link className="lp-btn lp-btn--outline" href="/preview">The Warm-Up</Link>
 					<a className="lp-btn lp-btn--outline" href="#how-to-join">View the tiers</a>
 				</div>
 			</div>

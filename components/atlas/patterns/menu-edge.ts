@@ -28,7 +28,7 @@ function place(el: HTMLElement) {
  * Ref callback for an `.atlas-menu` popover: keeps it fully inside the
  * viewport, shifting it horizontally if its anchored edge would overflow —
  * e.g. an `.atlas-menu--end` menu whose anchor sits near a narrow column's
- * left edge (columns narrow during Walk the Pitch, or on any small window).
+ * left edge (columns narrow during The Warm-Up, or on any small window).
  * A plain ref callback rather than a hook, so it drops onto a menu rendered
  * inside a `.map()` with no extra component needed.
  */

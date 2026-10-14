@@ -136,7 +136,7 @@ export function FeatureAccessProvider({ children }: { children: React.ReactNode 
 
     if (!feature) return { hasAccess: false, isLocked: true, userType, requiredTier: null, isLoading: false, error: false };
 
-    // Walk the Pitch practice: contact details stay locked even though practice
+    // The Warm-Up practice: contact details stay locked even though practice
     // shows the paid tier (lib/sandbox). Exports are refused by the sandbox itself.
     const sandbox = isSandboxEligible() ? activeSandbox() : null;
     if (sandbox && SANDBOX_LOCKED_FEATURES.has(feature.slug)) {

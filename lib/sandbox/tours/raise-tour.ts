@@ -1,22 +1,29 @@
 /**
- * "Walk the Pitch" for Atlas Raise: eight moves over the real app, played as the
- * sample company Fanloop (see raise-routes.ts for its ready-made workspace).
+ * "The Warm-Up" for Atlas Raise: the welcome screen plus six steps over the
+ * real app, played as the sample company Fanloop (see raise-routes.ts for its
+ * ready-made workspace).
  *
  * Each `target` is a `data-tour` attribute on the real element; lists mark only
  * their first item. Paths come from lib/routes.ts so they can't drift.
+ *
+ * Left out until they launch: deck analysis and the AI co-pilot (chat is off
+ * for the whole tour — the coach's guard blocks it with everything else).
  */
 import { canonicalHrefOf as hrefOf } from '@/lib/routes';
-import { SAMPLE_DECK_ID } from '../core-routes';
 import type { Tour } from '../tour-types';
 
-const DECK = hrefOf('deck');
 const INVESTORS = hrefOf('investors');
 
 export const raiseTour: Tour = {
 	product: 'raise',
 	intro: {
-		title: 'You’re Fanloop. Let’s raise.',
-		body: 'You run Fanloop, a Berlin fan-engagement startup raising a €1.5m seed with €300k already committed. Eight quick moves and you’ve seen the whole playbook.',
+		title: 'Welcome to Raise',
+		body: 'You’re Mira Hoffmann, founder of Fanloop, a fictional Berlin fan-engagement startup. You’re exploring Atlas Raise with sample data, and your round is already set up:',
+		points: [
+			{ label: 'Round', text: '€1.5m seed' },
+			{ label: 'Committed', text: '€300k so far' },
+			{ label: 'Sector', text: 'Fan Engagement' },
+		],
 	},
 	steps: [
 		{
@@ -28,25 +35,11 @@ export const raiseTour: Tour = {
 			advance: { kind: 'click' },
 		},
 		{
-			id: 'deck',
-			path: DECK,
-			target: 'deck-open',
-			title: 'Your deck scored 71/100',
-			body: 'Atlas read Fanloop’s deck the way an investor would and scored every section. Open the full analysis.',
-			advance: { kind: 'path', pattern: `${DECK}/:id` },
-		},
-		{
-			id: 'deck-top-fix',
-			path: `${DECK}/${SAMPLE_DECK_ID}`,
-			target: 'deck-top-fix',
-			title: 'Start with the top fix',
-			body: 'Recommendations are ranked by how much they lift the score. For Fanloop, a bottom-up market size comes first.',
-			advance: { kind: 'next' },
-		},
-		{
 			id: 'investors',
 			path: hrefOf('recommended'),
 			target: 'raise-top-investor',
+			// The card's own Add / Not relevant actions would skip the profile step.
+			only: `[data-tour="raise-top-investor"] a[href*="${INVESTORS}/"]`,
 			title: 'Investors who fit Fanloop',
 			body: 'Atlas matches investors on sector, stage and geography, and says why each one fits. Open your top match.',
 			advance: { kind: 'path', pattern: `${INVESTORS}/:id` },
@@ -63,29 +56,44 @@ export const raiseTour: Tour = {
 			id: 'pipeline',
 			path: hrefOf('pipeline'),
 			target: 'raise-pipeline-card',
+			highlights: ['raise-pipeline-contacted'],
+			// Contacted is the only stage this step allows: the card drops only on
+			// that column, and its details panel offers only that stage and Save.
+			dropOn: '[data-tour="raise-pipeline-contacted"]',
+			allow: ['[data-tour="raise-pipeline-stage"]', '[role="option"][data-value="contacted"]', '[data-tour="raise-pipeline-save"]'],
+			pointerOnly: true,
 			title: 'Move them to Contacted',
-			body: 'Your watchlist tracks every investor, stage by stage. Drag the new card to Contacted, or open it and change the stage.',
-			advance: { kind: 'request', method: 'PATCH', pattern: '/api/raise/pipeline/:id' },
+			body: 'Your watchlist tracks every investor, stage by stage. Drag the new card to Contacted, or open it, set the stage to Contacted and save.',
+			advance: { kind: 'request', method: 'PATCH', pattern: '/api/raise/pipeline/:id', body: { stage: 'contacted' } },
+			pause: 1200,
 		},
 		{
 			id: 'market',
 			path: hrefOf('my-market'),
 			target: 'raise-market-size',
 			title: 'Know your playing field',
-			body: 'Market size, growth and funding in your space, built on SportsTechX data. Your competitors are one tab over.',
+			body: 'Market size, growth and funding in your space, built on SportsTechX data.',
 			advance: { kind: 'next' },
 		},
 		{
-			id: 'copilot',
-			path: hrefOf('chat'),
-			target: 'chat-suggestion',
-			title: 'Ask your co-pilot',
-			body: 'The co-pilot knows your raise, your deck and your watchlist. Tap the suggested question to try it.',
-			advance: { kind: 'request', method: 'POST', pattern: '/api/chat' },
+			id: 'platform',
+			path: hrefOf('home'),
+			expandNav: true,
+			highlights: ['nav-raise', 'nav-discover', 'nav-watchlists', 'nav-intelligence'],
+			title: 'Explore the platform',
+			body: 'Everything you just did lives in the sidebar:',
+			points: [
+				{ label: 'Raise', text: 'Find the investors and programs that fit your round.' },
+				{ label: 'Discover', text: 'Find companies and investors worth your attention.' },
+				{ label: 'Watchlists', text: 'Track every investor conversation, stage by stage.' },
+				{ label: 'Intelligence', text: 'Research your market, competitors and funding trends.' },
+			],
+			cta: 'Finish Warm-Up',
+			advance: { kind: 'next' },
 		},
 	],
 	finale: {
-		title: 'Warm-up done',
-		body: 'With Atlas Raise this runs on your own deck, live investor data and your real conversations. Keep looking around Fanloop’s raise, or start yours for real.',
+		title: 'Warm-Up Complete. Ready to Play?',
+		body: 'You’ve seen your raise at a glance, found investors who fit, built your investor pipeline and sized up your market.\n\nNow put Atlas Raise to work with your own company, live investor data and real conversations with investors.',
 	},
 };

@@ -8,11 +8,16 @@ import { tourSelector } from './use-tour-target';
 
 /**
  * Wires a step's `advance` condition to `onDone`:
- *   - click   — a click (or change, for selects) on or inside the target;
- *   - request — a practice request matching method + pattern (lib/sandbox/events.ts);
+ *   - click   — a click (or change, for selects) on or inside the target, or
+ *               inside `on` when given; `simulate` swallows the click so the
+ *               app never acts on it;
+ *   - request — a practice request matching method + pattern (lib/sandbox/events.ts),
+ *               and carrying `body`'s values when given;
  *   - path    — the pathname matches the pattern, after having not matched
  *               (so going Back onto a page that already matches doesn't skip ahead);
  *   - next    — nothing here; the coach's Next button.
+ * A `click` step with `dropOn` also completes on a drop there (drag or pick,
+ * either way the same move).
  */
 export function useTourAdvance(step: TourStep | null, pathname: string, onDone: () => void) {
 	const done = useRef(onDone);
@@ -22,9 +27,11 @@ export function useTourAdvance(step: TourStep | null, pathname: string, onDone: 
 	const target = step?.target;
 
 	// click
+	const clickOn = adv?.kind === 'click' ? adv.on ?? (target ? tourSelector(target) : null) : null;
+	const simulate = adv?.kind === 'click' && !!adv.simulate;
 	useEffect(() => {
-		if (adv?.kind !== 'click' || !target) return;
-		const selector = tourSelector(target);
+		if (!clickOn) return;
+		const selector = clickOn;
 		const onEvent = (e: Event) => {
 			const el = e.target instanceof Element ? e.target : null;
 			// A <select>'s 'click' just opens the native dropdown — it fires before a
@@ -40,6 +47,9 @@ export function useTourAdvance(step: TourStep | null, pathname: string, onDone: 
 			// page. Only the coach drives navigation once a step has advanced.
 			const link = el.closest('a');
 			if (e.type === 'click' && link) e.preventDefault();
+			// A simulated action (e.g. Request introduction) never reaches the app:
+			// no modal, no request — the next step shows what would happen.
+			if (simulate) { e.preventDefault(); e.stopImmediatePropagation(); }
 			done.current();
 		};
 		document.addEventListener('click', onEvent, true);
@@ -48,20 +58,36 @@ export function useTourAdvance(step: TourStep | null, pathname: string, onDone: 
 			document.removeEventListener('click', onEvent, true);
 			document.removeEventListener('change', onEvent, true);
 		};
-	}, [adv, target]);
+	}, [clickOn, simulate]);
+
+	// drop — the drag-and-drop route of a click step
+	const dropOn = adv?.kind === 'click' ? step?.dropOn ?? null : null;
+	useEffect(() => {
+		if (!dropOn) return;
+		const onDrop = (e: Event) => {
+			if (e.target instanceof Element && e.target.closest(dropOn)) done.current();
+		};
+		document.addEventListener('drop', onDrop, true);
+		return () => document.removeEventListener('drop', onDrop, true);
+	}, [dropOn]);
 
 	// request
 	const reqMethod = adv?.kind === 'request' ? adv.method.toUpperCase() : null;
 	const reqPattern = adv?.kind === 'request' ? adv.pattern : null;
+	const reqBody = adv?.kind === 'request' && adv.body ? JSON.stringify(adv.body) : null;
 	useEffect(() => {
 		if (!reqMethod || !reqPattern) return;
+		const want = reqBody ? (JSON.parse(reqBody) as Record<string, unknown>) : null;
 		const onRequest = (e: Event) => {
 			const d = (e as CustomEvent<PracticeRequestDetail>).detail;
-			if (d && d.method.toUpperCase() === reqMethod && matchPath(reqPattern, d.path)) done.current();
+			if (!d || d.method.toUpperCase() !== reqMethod || !matchPath(reqPattern, d.path)) return;
+			const sent = d.body && typeof d.body === 'object' ? (d.body as Record<string, unknown>) : {};
+			if (want && Object.entries(want).some(([k, v]) => sent[k] !== v)) return;
+			done.current();
 		};
 		window.addEventListener(PRACTICE_REQUEST_EVENT, onRequest);
 		return () => window.removeEventListener(PRACTICE_REQUEST_EVENT, onRequest);
-	}, [reqMethod, reqPattern]);
+	}, [reqMethod, reqPattern, reqBody]);
 
 	// path
 	const pathPattern = adv?.kind === 'path' ? adv.pattern : null;

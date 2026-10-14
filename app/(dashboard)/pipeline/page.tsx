@@ -106,6 +106,7 @@ export default function RaisePipelinePage() {
 								onDragOver={(e) => { e.preventDefault(); if (dragOver !== s) setDragOver(s); }}
 								onDragLeave={() => setDragOver((cur) => (cur === s ? null : cur))}
 								onDrop={(e) => { e.preventDefault(); setDragOver(null); const id = e.dataTransfer.getData('text/plain'); if (id) void moveCard(id, s); }}
+								data-tour={s === 'contacted' ? 'raise-pipeline-contacted' : undefined}
 								className="atlas-card"
 								style={{ flex: '0 0 248px', minWidth: 248, display: 'flex', flexDirection: 'column', padding: '14px 12px 12px', borderColor: dragOver === s ? 'var(--a-border-strong)' : undefined }}>
 								<div style={{ fontFamily: 'var(--a-mono)', fontSize: 11, letterSpacing: '0.05em', textTransform: 'uppercase', padding: '0 4px 12px', marginBottom: 10, borderBottom: '1px solid var(--a-border)', display: 'flex', justifyContent: 'space-between', gap: 8, color: 'var(--a-ink)' }}>
@@ -158,7 +159,8 @@ function DetailPanel({ row, onClose, onSaved }: { row: Pipe; onClose: () => void
 	return (
 		<Drawer onClose={onClose} title={nameOf(row)}>
 			<div style={{ display: 'grid', gap: 14 }}>
-				<Field label="Stage"><Select value={f.stage} onChange={(e) => set('stage', e.target.value)} options={STAGES} /></Field>
+				{/* Wrapper carries the tour anchor: Select takes no data-* props. */}
+				<Field label="Stage"><div data-tour="raise-pipeline-stage"><Select value={f.stage} onChange={(e) => set('stage', e.target.value)} options={STAGES} /></div></Field>
 				<Field label="Contact"><Input value={f.contact_name ?? ''} onChange={(e) => set('contact_name', e.target.value)} /></Field>
 				<Field label="Potential amount (€)"><Input type="number" min={0} value={(f.potential_amount as string) ?? ''} onChange={(e) => set('potential_amount', e.target.value)} /></Field>
 				<Field label="Next step"><Input value={f.next_step ?? ''} onChange={(e) => set('next_step', e.target.value)} /></Field>
@@ -166,7 +168,7 @@ function DetailPanel({ row, onClose, onSaved }: { row: Pipe; onClose: () => void
 				<Field label="Notes"><Textarea value={f.notes ?? ''} onChange={(e) => set('notes', e.target.value)} /></Field>
 			</div>
 			<div style={{ display: 'flex', gap: 8, marginTop: 20 }}>
-				<Button disabled={busy} onClick={() => void save({
+				<Button data-tour="raise-pipeline-save" disabled={busy} onClick={() => void save({
 					stage: f.stage, contact_name: f.contact_name || null, potential_amount: f.potential_amount || null,
 					next_step: f.next_step || null, next_step_due: f.next_step_due || null, notes: f.notes || null,
 				})}>{busy ? <Loader2 className="animate-spin" size={13} /> : 'Save'}</Button>

@@ -17,7 +17,7 @@ import { WalkthroughButton } from '@/components/features/walkthrough/walkthrough
  * Stripe, so "Request" would promise a conversation that never happens — the
  * label follows the behaviour rather than the mockup.
  *
- * Each card also offers "Walk the pitch →", the guided practice run of that
+ * Each card also offers "Try the Warm-Up →", the guided practice run of that
  * product (lib/sandbox). It sits outside the card's link — a button can't nest
  * inside an anchor — and hides itself for anyone who isn't a real Explore user.
  */

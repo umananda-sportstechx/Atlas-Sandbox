@@ -189,6 +189,7 @@ export function Combobox({ value, onChange, options, groups, placeholder = 'Sele
 												type="button"
 												role="option"
 												data-ci={idx}
+												data-value={v}
 												aria-selected={v === value}
 												className={cx('atlas-combo-opt', v === value && 'is-selected', idx === active && 'is-active')}
 												onMouseEnter={() => setActive(idx)}

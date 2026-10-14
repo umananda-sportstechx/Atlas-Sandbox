@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * "Walk the Pitch" pre-signup preview — a logged-out visitor runs the exact
+ * "The Warm-Up" pre-signup preview — a logged-out visitor runs the exact
  * same guided tour (components/features/walkthrough/*) over the exact same
  * product pages, under `/preview/[product]/*` (app/preview/) instead of the
  * real `/home`, `/deck`, etc.
@@ -17,7 +17,7 @@
  * Deriving from the URL means there is no stored state to go stale.
  *
  * Everything that normally requires a real signed-in Explore profile to run
- * Walk the Pitch (lib/sandbox/eligibility.ts, use-practice-access.ts,
+ * The Warm-Up (lib/sandbox/eligibility.ts, use-practice-access.ts,
  * lib/routes.ts's path builders) checks this instead, and the interceptor
  * (lib/sandbox/interceptor.ts) uses it to make sure an anonymous visitor's
  * browser never reaches the real backend. Outside `/preview/*` this is always

@@ -1,40 +1,95 @@
 /**
- * "Walk the Pitch" — guided tour definitions (one per product).
+ * "The Warm-Up" — guided tour definitions (one per product).
  *
  * A tour runs on the real app pages with sample data (the sandbox interceptor).
- * Each step points at one element (by its `data-tour` attribute), shows a short
- * instruction in the coach panel, and completes when its `advance` condition is
- * met. After the last step the user stays in view-only practice mode.
+ * It is a guided demo, not a sandbox: while a step is open only its target
+ * (plus any `allow`ed popover it opens) can be clicked or typed into — the
+ * coach's guard swallows everything else. Each step shows a short instruction
+ * in the coach panel and completes when its `advance` condition is met. After
+ * the last step the visitor gets the completion screen: sign up or replay.
  */
 import type { SandboxProduct } from './types';
 
 export type TourAdvance =
-	/** A "Next" button in the coach panel (reading steps). */
+	/** A button in the coach panel (reading steps); its label is the step's `cta`, else "Next". */
 	| { kind: 'next' }
-	/** The user clicks the highlighted element (`target`). */
-	| { kind: 'click' }
-	/** The app sends a request matching method + path pattern (`:param` segments), e.g. a pipeline move. */
-	| { kind: 'request'; method: string; pattern: string }
+	/**
+	 * The user clicks the highlighted element (`target`), or — with `on` — an
+	 * element matching that CSS selector (e.g. one option in the popover the
+	 * target opens). `simulate` swallows the click, so the app never acts on it:
+	 * the next step shows what would have happened instead.
+	 */
+	| { kind: 'click'; on?: string; simulate?: boolean }
+	/**
+	 * The app sends a request matching method + path pattern (`:param` segments),
+	 * e.g. a watchlist save — and, with `body`, whose JSON body carries these
+	 * values (a pipeline move only counts when it moves to the right stage).
+	 */
+	| { kind: 'request'; method: string; pattern: string; body?: Record<string, string | number | boolean> }
 	/** The user lands on a page whose pathname matches the pattern (`:param` segments), e.g. a profile. */
 	| { kind: 'path'; pattern: string };
 
 export interface TourStep {
 	/** Stable id, used for analytics: `walkthrough:<product>:<id>`. */
 	id: string;
-	/** Page the step happens on. The engine navigates here when the step opens (skipped if already on a matching path). */
+	/**
+	 * Page the step happens on. The engine navigates here when the step opens
+	 * (skipped if already there). Prefer concrete paths: a `:param` path can only
+	 * be reached by the previous step's own navigation, or Back from a later step.
+	 */
 	path: string;
-	/** `data-tour` value of the element to highlight; omit for a page-level step. */
+	/** `data-tour` value of the element to highlight and leave interactive; omit for a page-level step. */
 	target?: string;
+	/**
+	 * CSS selector for the part of the target that can be used, when the
+	 * target is bigger than the action — e.g. a whole card highlighted, but only
+	 * its "View profile" link clickable. Default: the whole target.
+	 */
+	only?: string;
+	/** More `data-tour` values to highlight for orientation only — never interactive. */
+	highlights?: string[];
+	/**
+	 * CSS selectors that stay interactive besides the target — the popover or
+	 * menu the target opens, narrowed to the one choice the step wants. Each is
+	 * also highlighted once it is on screen.
+	 */
+	allow?: string[];
+	/**
+	 * What may be dragged (CSS selector) when that is bigger than what may be
+	 * clicked — e.g. a whole board card, while only its stage menu takes clicks.
+	 */
+	dragFrom?: string;
+	/**
+	 * Where the target may be dropped, when it is dragged (CSS selector). On a
+	 * `click` step, a drop there completes the step too. Every
+	 * other drop zone refuses it. Without this, drops only land inside allowed elements.
+	 */
+	dropOn?: string;
+	/** Block keyboard input on the target too (e.g. a select whose arrow keys could pick a stage the step forbids). */
+	pointerOnly?: boolean;
 	title: string;
 	/** One or two short sentences. `{{Key}}` renders as a keyboard key. */
 	body: string;
+	/** Labelled points under the body (e.g. what each sidebar section is for). */
+	points?: { label: string; text: string }[];
+	/** Label for the panel's advance button on `next` steps (default "Next"). */
+	cta?: string;
 	advance: TourAdvance;
+	/** Milliseconds to hold on the page once the step is done, so its result is seen before the tour moves on. */
+	pause?: number;
+	/** The second interaction of the previous numbered step: shares its step number. */
+	continues?: boolean;
+	/** Show the product sidebar expanded, with labels (it is collapsed during the rest of the tour). */
+	expandNav?: boolean;
+	/** A simulated confirmation, shown as a card over the page instead of a real action. */
+	confirm?: { title: string; body: string };
 }
 
 export interface Tour {
 	product: SandboxProduct;
-	/** Shown before step 1: who the user is in this practice run. */
-	intro: { title: string; body: string };
+	/** The welcome screen — numbered step 1. Who the visitor is in this run. */
+	intro: { title: string; body: string; points?: { label: string; text: string }[] };
 	steps: TourStep[];
+	/** The completion screen: sign up or replay — no free exploring after it. */
 	finale: { title: string; body: string };
 }

@@ -4,7 +4,7 @@
  * benchmarks and the Deal Flow opt-in — answered from a workspace kept in the
  * browser (see store.ts).
  *
- * "Walk the Pitch" plays a READY-MADE founder: the sample company Fanloop, a
+ * "The Warm-Up" plays a READY-MADE founder: the sample company Fanloop, a
  * Berlin fan-engagement startup raising a €1.5m seed with €300k committed. The
  * first request builds that workspace (raise set up, criteria filled, watchlist,
  * market and matches in place), so the tour (tours/raise-tour.ts) opens on a
@@ -71,6 +71,8 @@ const INVESTOR_FETCH = PIPELINE_SEED_COUNT + MATCH_CAP;
 /** The sample company (the core's sample deck is Fanloop's too). */
 const SAMPLE = {
 	company: 'Fanloop', city: 'Berlin', country: 'Germany',
+	/** The founder the visitor plays (fictional). */
+	founder: 'Mira Hoffmann',
 	target: 1_500_000, committed: 300_000,
 	/** Taxonomy names to look for, leaf first; the whole list is the fallback path. */
 	sector: ['Fans', 'Fan Engagement'],
@@ -165,6 +167,13 @@ const FALLBACK_INVESTORS: InvestorRef[] = [
 	['Overlap VC', 'Sweden', 'Seed', 6],
 	['Stoppage Time Capital', 'Italy', 'Seed · Series A', 8],
 	['Grandstand Ventures', 'Belgium', 'Seed', 5],
+	// Not in the seeded pipeline (SEED takes the first eight), so the matches the
+	// tour opens are investors Fanloop can still add — the first would otherwise
+	// be its own committed lead, with no "Add to watchlist" on its profile.
+	['Matchpoint Ventures', 'Germany', 'Seed · Series A', 12],
+	['Touchline Capital', 'Austria', 'Seed', 10],
+	['Extra Time Partners', 'Switzerland', 'Seed · Series A', 9],
+	['Offside Ventures', 'Denmark', 'Pre-seed · Seed', 15],
 ].map(([name, hq_country, category, deals_count], i) => ({
 	id: `sbx-investor-${i + 1}`, name: String(name), slug: null, website: null, logo_url: null,
 	hq_country: String(hq_country), category: String(category),
@@ -388,6 +397,9 @@ function buildHome(ws: Workspace) {
 	const s = pipelineStats(ws.pipeline);
 	return {
 		needs_setup: false,
+		// Sample-only: the real home read-model has no name — the app greets the
+		// signed-in profile. The pre-signup Warm-Up has no profile, so it reads this.
+		founder: { full_name: SAMPLE.founder },
 		raise: {
 			round_type: raise.round_type, target_amount: raise.target_amount, committed_amount: raise.committed_amount,
 			currency_code: raise.currency_code, target_close_date: raise.target_close_date, status: raise.status,

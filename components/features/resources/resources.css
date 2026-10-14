@@ -1,0 +1,8 @@
+/* Reports + Newsletter page furniture. The cards themselves are the shared
+   Figma post cards (`.atlas-post*` in components.css). */
+.atlas .atlas-res-intro {
+	margin: 0 0 26px; max-width: 720px;
+	font-family: var(--a-body); font-size: 13px; line-height: 1.6; color: var(--a-muted);
+}
+.atlas .atlas-res-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin: 52px 0 16px; }
+.atlas .atlas-res-rule { height: 1px; background: var(--a-border); margin: 4px 0 22px; }

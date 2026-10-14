@@ -1,12 +1,20 @@
 import type { NextConfig } from 'next';
 
 /**
- * Static single-page product demo. No backend, no server routes — it exports to
- * plain HTML/JS and is hosted like the landing repos (push to main → deploy).
+ * Standalone sandbox demo. There is NO backend: the sandbox interceptor
+ * (lib/sandbox/interceptor.ts) answers /api/* in the browser with mock data, so
+ * the original /api proxy + BACKEND_URL requirement are removed on purpose.
  */
 const nextConfig: NextConfig = {
-  output: 'export',
-  images: { unoptimized: true },
+  allowedDevOrigins: ['*.trycloudflare.com'],
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: '**.supabase.co' },
+      { protocol: 'https', hostname: '**.supabase.in' },
+      { protocol: 'https', hostname: 'logo.clearbit.com' },
+      { protocol: 'https', hostname: '*.apollo.io' },
+    ],
+  },
 };
 
 export default nextConfig;

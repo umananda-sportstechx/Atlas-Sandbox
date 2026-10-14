@@ -1,6 +1,6 @@
 /**
  * Practice request event: the interceptor fires it on `window` after every
- * `/api/*` request it answers or forwards in practice, so the Walk the Pitch
+ * `/api/*` request it answers or forwards in practice, so The Warm-Up's
  * coach can advance on `request` steps. Kept apart from interceptor.ts so UI
  * code can listen without importing the route tables.
  */
@@ -11,4 +11,6 @@ export interface PracticeRequestDetail {
 	method: string;
 	/** URL pathname, no query. */
 	path: string;
+	/** Parsed JSON body, when the request sent one. */
+	body?: unknown;
 }

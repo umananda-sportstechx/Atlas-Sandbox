@@ -9,7 +9,7 @@ import { MenuIcon } from '../brand/menu-icon';
 import { PLACEHOLDER_LABEL } from '../patterns/placeholder-tag';
 import { AtlasLogo, AtlasMark } from '../brand/atlas-logo';
 import { FigmaIcon } from '../icons/figma-icons';
-import { isSection, pickActive, type ShellNavEntry, type ShellNavItem } from './nav';
+import { isSection, navTourId, pickActive, type ShellNavEntry, type ShellNavItem } from './nav';
 import './atlas-shell.css';
 
 /**
@@ -51,18 +51,21 @@ export interface AtlasShellProps {
 	 * deliberately manifest- and session-free.
 	 */
 	railAccount?: ReactNode;
-	/** Force the rail collapsed (e.g. during Walk the Pitch, for room beside the coach panel) without touching the user's own saved preference. */
+	/** Force the rail collapsed (e.g. during The Warm-Up, for room beside the coach panel) without touching the user's own saved preference. */
 	forceCollapsed?: boolean;
+	/** Force the rail expanded, labels showing (The Warm-Up's sidebar orientation step). Wins over `forceCollapsed`. */
+	forceExpanded?: boolean;
 	children: ReactNode;
 }
 
-export function AtlasShell({ product, productColor, homePath, nav, topbar, overlay, railExtra, railAccount, forceCollapsed, children }: AtlasShellProps) {
+export function AtlasShell({ product, productColor, homePath, nav, topbar, overlay, railExtra, railAccount, forceCollapsed, forceExpanded, children }: AtlasShellProps) {
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
 	const railKey = `stx:${product.toLowerCase()}-rail-collapsed`;
 	const sectionsKey = `stx:${product.toLowerCase()}-nav-closed`;
 	const storedCollapsed = useSyncExternalStore(subscribe, () => readStored(railKey) === '1', () => false);
-	const collapsed = forceCollapsed || storedCollapsed;
+	const collapsed = !forceExpanded && (forceCollapsed || storedCollapsed);
+	const pinned = forceCollapsed || forceExpanded;
 	// Closed sections, stored as a JSON array of titles (default: all open).
 	const closedRaw = useSyncExternalStore(subscribe, () => readStored(sectionsKey) ?? '[]', () => '[]');
 	const closed = parseList(closedRaw);
@@ -99,7 +102,7 @@ export function AtlasShell({ product, productColor, homePath, nav, topbar, overl
 		const cls = 'atlas-nav-item';
 		if (item.soon) {
 			return (
-				<span key={item.path} className={`${cls} is-soon`} aria-disabled="true" {...tipProps(`${item.name} (soon)`)}>
+				<span key={item.path} className={`${cls} is-soon`} aria-disabled="true" data-tour={item.tour} {...tipProps(`${item.name} (soon)`)}>
 					<span className="atlas-nav-ico"><FigmaIcon name={item.icon} /></span>
 					<span className="atlas-nav-label">{item.name}</span>
 					<span className="atlas-soon" aria-label="coming soon">Soon</span>
@@ -107,7 +110,7 @@ export function AtlasShell({ product, productColor, homePath, nav, topbar, overl
 			);
 		}
 		return (
-			<Link key={item.path} href={item.path} className={`${cls} ${isActive(item.path) ? 'active' : ''}`} aria-current={isActive(item.path) ? 'page' : undefined} {...tipProps(item.name)} onClick={() => { setOpen(false); setTip(null); }}>
+			<Link key={item.path} href={item.path} data-tour={item.tour} className={`${cls} ${isActive(item.path) ? 'active' : ''}`} aria-current={isActive(item.path) ? 'page' : undefined} {...tipProps(item.name)} onClick={() => { setOpen(false); setTip(null); }}>
 				<span className="atlas-nav-ico"><FigmaIcon name={item.icon} /></span>
 				<span className="atlas-nav-label">{item.name}</span>
 				{item.placeholder && <span className="atlas-soon" title={PLACEHOLDER_LABEL}>Not connected</span>}
@@ -121,7 +124,7 @@ export function AtlasShell({ product, productColor, homePath, nav, topbar, overl
 		const isOpen = holdsActive || !closed.includes(e.title);
 		const id = `nav-sec-${e.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
 		return (
-			<div key={e.title} className={`atlas-nav-section${isOpen ? '' : ' is-closed'}`}>
+			<div key={e.title} className={`atlas-nav-section${isOpen ? '' : ' is-closed'}`} data-tour={navTourId(e.title)}>
 				<button type="button" className="atlas-nav-section__head" aria-expanded={isOpen} aria-controls={id} onClick={() => toggleSection(e.title)} disabled={holdsActive}>
 					<span>{e.title}</span>
 					<span className="atlas-nav-caret"><FigmaIcon name="nav-caret" /></span>
@@ -138,7 +141,7 @@ export function AtlasShell({ product, productColor, homePath, nav, topbar, overl
 				<div className="atlas-rail-head">
 					{/* Collapsed, the mark IS the expand control. The design put a bare
 					    hamburger here, which left no sign of which product you were in.
-					    Forced collapsed (Walk the Pitch) it's just the mark: expanding
+					    Forced collapsed (The Warm-Up) it's just the mark: expanding
 					    would only be overridden straight back by `forceCollapsed`. */}
 					{collapsed ? (
 						forceCollapsed ? (
@@ -154,7 +157,7 @@ export function AtlasShell({ product, productColor, homePath, nav, topbar, overl
 					) : (
 						<Link href={homePath} className="atlas-brand" aria-label={homeLabel}><AtlasLogo height={24} product={product} productColor={productColor} /></Link>
 					)}
-					{!collapsed && (
+					{!collapsed && !pinned && (
 						<button className="atlas-rail-toggle" aria-label="Collapse sidebar" aria-expanded title="Collapse sidebar" onClick={() => writeStored(railKey, '1')}><MenuIcon /></button>
 					)}
 					<button className="atlas-rail-close" aria-label="Close menu" onClick={() => setOpen(false)}><X size={18} strokeWidth={1.5} /></button>

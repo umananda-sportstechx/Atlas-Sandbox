@@ -1,7 +1,7 @@
 /**
- * Sandbox ("Walk the Pitch") — Scout-only endpoints answered locally.
+ * Sandbox ("The Warm-Up") — Scout-only endpoints answered locally.
  *
- * The practice run ("Walk the Pitch") starts as a READY-MADE sample investor:
+ * The practice run ("The Warm-Up") starts as a READY-MADE sample investor:
  * Jordan Ellis, partner at the fictional Kestrel Field Ventures, with a fully
  * set-up, verified Scout workspace and a seed–Series A European sports-tech
  * thesis built from REAL taxonomy rows (sector / sport / round-type ids are
@@ -280,6 +280,8 @@ interface CompanyLite {
 	website: string | null; custom_logo_url: string | null; sector_id: string | null;
 	primary_sector: string | null; hq_city: string | null; hq_country: string | null;
 	total_funding_usd: string | null;
+	/** Sample-only profile detail: the public list carries none of these. */
+	latest_round?: string | null; founded_year?: number | null; business_model?: string | null;
 }
 
 /** Mirrors `RecommendationRow` / `Recommendation` in recommended.tsx. */
@@ -293,16 +295,24 @@ interface Recommendation {
 }
 
 /** Used only when the public companies list cannot be read. */
-export const FALLBACK_COMPANIES: CompanyLite[] = [
-	['Pitchside Metrics', 'Computer-vision match analytics for semi-pro football clubs.', 'Tracking & Analytics', 'Leeds', 'United Kingdom', '1800000'],
-	['Racketry', 'Court booking and league software for padel clubs.', 'Booking & Discovery', 'Valencia', 'Spain', '650000'],
-	['Fanfold', 'Loyalty and ticketing wallet for mid-tier European clubs.', 'Fan Engagement', 'Hamburg', 'Germany', '2400000'],
-	['Strideline', 'Running gait coaching app built on wearable data.', 'Tracking & Analytics', 'Stockholm', 'Sweden', '900000'],
-].map(([name, description, sector, city, country, funding], i) => ({
+export const FALLBACK_COMPANIES: CompanyLite[] = ([
+	['Pitchside Metrics', 'Computer-vision match analytics for semi-pro football clubs.', 'Tracking & Analytics', 'Leeds', 'United Kingdom', '1800000', 'Seed', 2020, 'b2b'],
+	['Racketry', 'Court booking and league software for padel clubs.', 'Booking & Discovery', 'Valencia', 'Spain', '650000', 'Pre-seed', 2022, 'b2b'],
+	['Fanfold', 'Loyalty and ticketing wallet for mid-tier European clubs.', 'Fan Engagement', 'Hamburg', 'Germany', '2400000', 'Seed', 2021, 'b2b2c'],
+	['Strideline', 'Running gait coaching app built on wearable data.', 'Tracking & Analytics', 'Stockholm', 'Sweden', '900000', 'Pre-seed', 2022, 'b2c'],
+] as const).map(([name, description, sector, city, country, funding, round, founded, model], i) => ({
 	id: `7a1c3e5f-0b2d-4c6e-8f1a-3b5d7f9a1c0${i}`,
 	name, slug: null, description, website: null, custom_logo_url: null, sector_id: null,
 	primary_sector: sector, hq_city: city, hq_country: country, total_funding_usd: funding,
+	latest_round: round, founded_year: founded, business_model: model,
 }));
+
+/**
+ * Fanfold — the tour's predetermined match. With no backend the public company
+ * list is empty, so these four are the recommendations, and Fanfold (sector +
+ * geography, first alphabetically among the two-dimension matches) tops them.
+ */
+export const SANDBOX_FANFOLD_ID = FALLBACK_COMPANIES[2].id;
 
 const str = (v: unknown): string | null => (typeof v === 'string' && v ? v : null);
 
@@ -374,6 +384,12 @@ function underSector(id: string | null, targets: Set<string>, byId: Map<string, 
 	return false;
 }
 
+/** A company's latest round ("Seed") against the thesis round types ("Seed Round", "Series A"). */
+function roundMatches(round: string | null | undefined, rounds: TaxonomyRef[]): boolean {
+	const r = round?.trim().toLowerCase();
+	return !!r && rounds.some((t) => (t.name ?? '').toLowerCase().startsWith(r));
+}
+
 /** Scored against the caller's own thesis; an empty thesis matches nothing (server parity). */
 async function recommendations(ctx: SandboxCtx, thesis: ServerThesis): Promise<Recommendation[]> {
 	const [companies, sectors] = await Promise.all([sampleCompanies(ctx), reference(ctx, REF_PATHS.sectors)]);
@@ -387,15 +403,17 @@ async function recommendations(ctx: SandboxCtx, thesis: ServerThesis): Promise<R
 					? underSector(c.sector_id, sectorIds, byId)
 					: sectorNames.has((c.primary_sector ?? '').toLowerCase()),
 				match_geo: geoMatches(c.hq_country, thesis.geo),
-				// The public list carries no latest round, so stage and cheque cannot
-				// be shown as matched — the server's rule for a company with no deal.
-				match_stage: false,
+				// The public list carries no latest round, so stage cannot be shown as
+				// matched — the server's rule for a company with no deal. The sample
+				// companies do carry one, so their profile and their match agree.
+				match_stage: roundMatches(c.latest_round, thesis.round_types),
+				// No ticket size is known for any of them.
 				match_cheque: false,
 			};
 			return {
 				id: c.id, name: c.name, slug: c.slug, description: c.description, website: c.website,
 				custom_logo_url: c.custom_logo_url, sector: c.primary_sector, city: c.hq_city, country: c.hq_country,
-				total_funding_usd: c.total_funding_usd, latest_round: null,
+				total_funding_usd: c.total_funding_usd, latest_round: c.latest_round ?? null,
 				...flags, match_count: Object.values(flags).filter(Boolean).length,
 			};
 		})

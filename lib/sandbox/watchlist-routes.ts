@@ -18,12 +18,15 @@ interface WatchlistState { lists: StoredList[]; items: Record<string, StoredComp
 
 const SEED_COUNT = 8;
 const NAME_MAX = 120;
-const SHORTLIST_ID = 'sandbox-wl-shortlist';
+/** The seeded list the Scout tour saves Fanfold to and opens. */
+export const SHORTLIST_ID = 'sandbox-wl-shortlist';
 const PORTFOLIO_ID = 'sandbox-wl-portfolio';
 
 export const FALLBACK: StoredCompany[] = [
-	['Fanloop', 'Fan Engagement', 'Lisbon', 'Portugal', 4_200_000],
-	['Strideline Labs', 'Wearables', 'Copenhagen', 'Denmark', 9_800_000],
+	// Distinct from the tours' own sample companies (Raise's Fanloop, Scout's Fanfold
+	// and Strideline), so no name appears twice with different details.
+	['Terrace Club', 'Fan Engagement', 'Lisbon', 'Portugal', 4_200_000],
+	['Gripworks', 'Wearables', 'Copenhagen', 'Denmark', 9_800_000],
 	['Courtside Data', 'Performance Analytics', 'Austin', 'United States', 12_500_000],
 	['Kitbag Exchange', 'Commerce', 'Manchester', 'United Kingdom', 2_100_000],
 	['Pace & Point', 'Coaching', 'Melbourne', 'Australia', 3_600_000],

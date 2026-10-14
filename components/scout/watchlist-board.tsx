@@ -37,10 +37,11 @@ export function WatchlistBoard({ id }: { id: string }) {
 								onDragLeave={() => setOver((o) => (o === s ? null : o))}
 								onDrop={(e) => { e.preventDefault(); if (dragging) move(dragging, s); setDragging(null); setOver(null); }}
 								aria-label={`${s}: ${cards.length}`}
+								data-tour={s === 'Reviewing' ? 'scout-board-reviewing' : undefined}
 							>
 								<div className="scout-board__head"><span>{s}</span><span className="scout-board__n">{cards.length}</span></div>
 								{cards.map((c) => (
-									<article key={c.id} className="scout-board__card" draggable onDragStart={() => setDragging(c.id)} onDragEnd={() => { setDragging(null); setOver(null); }}>
+									<article key={c.id} className="scout-board__card" data-tour={c.id === companies[0]?.id ? 'scout-board-card' : undefined} draggable onDragStart={() => setDragging(c.id)} onDragEnd={() => { setDragging(null); setOver(null); }}>
 										<div className="scout-board__id">
 											<Logo co={{ name: c.name, website: c.website, custom_logo_url: c.custom_logo_url }} size={26} radius={5} />
 											<Link href={companyHref(c.slug ?? c.id)} className="scout-board__name">{c.name}</Link>

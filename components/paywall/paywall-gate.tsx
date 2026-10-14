@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import useSWR from 'swr';
 import { Check, Loader2 } from 'lucide-react';
-// The plan chooser shows the account's real plan, never a Walk the Pitch practice tier.
+// The plan chooser shows the account's real plan, never a Warm-Up practice tier.
 import { getRealUserType as getUserType, useUserProfile, type UserType } from '@/hooks/use-user-profile';
 import { WalkthroughButton } from '@/components/features/walkthrough/walkthrough-button';
 import { apiRequest } from '@/lib/query-client';

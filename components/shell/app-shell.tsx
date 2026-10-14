@@ -6,10 +6,11 @@ import { usePathname } from 'next/navigation';
 import { AtlasShell } from '@/components/atlas';
 import { PracticeBar } from '@/components/features/walkthrough/practice-bar';
 import { usePracticeAccess } from '@/components/features/walkthrough/use-practice-access';
+import { tourExpandsNav } from '@/components/features/walkthrough/tours';
 import { RouteGate } from '@/components/auth/route-gate';
 import { Navbar } from './navbar';
 import { RailAccount } from './rail-account';
-// Walk the Pitch coach: only Explore users in practice ever load it.
+// The Warm-Up coach: only Explore users in practice ever load it.
 const WalkthroughCoach = dynamic(() => import('@/components/features/walkthrough/walkthrough-coach').then((m) => m.WalkthroughCoach), { ssr: false });
 // Raise-only, so a static import here shipped the co-pilot to Explore and
 // Scout users who can never open it.
@@ -60,7 +61,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 	// NEXT_PUBLIC_MIXPANEL_TOKEN is set.
 	useEffect(() => { trackPage(pathname); }, [pathname]);
 	const { ready, tier, nav, homePath, accountPath } = useNav();
-	// Walk the Pitch: the guided tour's coach, only in its `tour` phase.
+	// The Warm-Up: the guided tour's coach, only in its `tour` phase.
 	const { inPractice, practice } = usePracticeAccess();
 	const coach = inPractice && practice.phase === 'tour' ? <WalkthroughCoach /> : null;
 	const chat = !pathname.startsWith(hrefOf('chat')) ? <RaiseChat /> : null;
@@ -87,6 +88,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 				// whole practice session (tour and view-only), without touching the
 				// user's own saved rail preference for when they're not in practice.
 				forceCollapsed={inPractice}
+				forceExpanded={inPractice && tourExpandsNav(practice)}
 				// The co-pilot FAB, on every tier. It used to be hidden from Explore
 				// because the API refused them; now credits are the only limit, so a
 				// free user gets the assistant too and is told when they run out. The

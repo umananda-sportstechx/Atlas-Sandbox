@@ -91,7 +91,7 @@ const AUTH_PATHS = new Set([
  * page is public and must not do that, whatever is in the cookie jar.
  *
  * `isPreviewMode()` is checked directly, not just `/preview` being in
- * PUBLIC_PATHS: a visitor testing Walk the Pitch in a browser that also has a
+ * PUBLIC_PATHS: a visitor testing The Warm-Up in a browser that also has a
  * real (even stale) session elsewhere on this origin has `hasValidSession()`
  * true, and hard-navigating THAT away from a sandboxed page over a 401 that
  * was never a real auth failure is exactly the loop this function exists to

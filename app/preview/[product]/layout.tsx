@@ -8,7 +8,7 @@ import type { SandboxProduct } from '@/lib/sandbox/types';
 const PRODUCTS: SandboxProduct[] = ['raise', 'scout'];
 
 /**
- * Public, pre-signup "Walk the Pitch" — deliberately NOT under app/(dashboard):
+ * Public, pre-signup "The Warm-Up" — deliberately NOT under app/(dashboard):
  * no auth gate, no entitlement gate, no real session anywhere in this tree.
  *
  * Rendered client-only, not server-rendered. `lib/preview-mode.ts` derives

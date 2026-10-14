@@ -24,7 +24,11 @@ import { previewHref } from '@/lib/preview-mode';
  */
 
 interface Attention { id: string; title: string; why: string; cta_label: string; cta_href: string; count?: number }
-interface Home { attention: Attention[] }
+interface Home {
+	attention: Attention[];
+	/** Only the Warm-Up's sample workspace sends it (lib/sandbox/raise-routes.ts): there is no signed-in profile to greet there. */
+	founder?: { full_name: string | null } | null;
+}
 
 /** Category tag + icon per attention item (ids come from the raise-home service). */
 const ATTENTION_TAG: Record<string, { tag: string; icon: LucideIcon }> = {
@@ -49,7 +53,7 @@ export function RaiseHome() {
 		return <div className="raise-home"><div style={{ display: 'grid', placeItems: 'center', minHeight: '60vh' }}><Loader2 className="animate-spin" size={22} /></div></div>;
 	}
 
-	const greetName = profile?.display_name?.split(' ')[0] ?? profile?.full_name?.split(' ')[0] ?? 'there';
+	const greetName = (profile?.display_name ?? profile?.full_name ?? data.founder?.full_name ?? '').split(' ')[0] || 'there';
 	const hour = new Date().getHours();
 	const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
 

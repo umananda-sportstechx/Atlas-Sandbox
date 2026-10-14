@@ -8,13 +8,13 @@ import { usePracticeAccess } from './use-practice-access';
 import './walkthrough.css';
 
 /**
- * "Walk the pitch →" — starts the guided Raise or Scout tour on sample data
+ * "Try the Warm-Up →" — starts the guided Raise or Scout tour on sample data
  * (lib/sandbox). Renders nothing unless the viewer is a real Explore user
  * outside practice.
  *
  * `beforeStart` lets the post-signup plan chooser settle the account on Explore first.
  */
-export function WalkthroughButton({ product, source, beforeStart, label = 'Walk the pitch →', className, style }: {
+export function WalkthroughButton({ product, source, beforeStart, label = 'Try the Warm-Up →', className, style }: {
 	product: SandboxProduct;
 	/** Where the click came from, for analytics (e.g. "plans", "tier-gate"). */
 	source: string;

@@ -70,7 +70,9 @@ export function ScoutHome() {
 		if (t) router.push(`${hrefOf('chat')}?q=${encodeURIComponent(t)}`);
 	};
 
-	const first = (profile?.display_name ?? profile?.full_name ?? '').split(' ')[0] || 'there';
+	// The Scout workspace's own name is the fallback — it is all the pre-signup
+	// Warm-Up has (Jordan Ellis), with no signed-in profile behind it.
+	const first = (profile?.display_name ?? profile?.full_name ?? data?.scout?.full_name ?? '').split(' ')[0] || 'there';
 	const hour = new Date().getHours();
 	const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
 	const month = new Date(new Date().getFullYear(), new Date().getMonth() - 1)

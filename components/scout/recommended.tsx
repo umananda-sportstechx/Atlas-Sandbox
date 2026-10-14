@@ -62,6 +62,23 @@ const CHIPS: [label: string, key: MatchKey][] = [
 
 const place = (c: Recommendation) => [c.city, c.country].filter(Boolean).join(', ');
 
+const listOf = (words: string[]) => (words.length < 2 ? words.join('') : `${words.slice(0, -1).join(', ')} and ${words[words.length - 1]}`);
+
+/**
+ * The chips in a sentence, saying what didn't match as plainly as what did —
+ * "Matches 2 of 4" alone left a partial match reading as a weak one. Unmatched
+ * dimensions are "not confirmed": false covers both a real mismatch and a
+ * company whose stage or round we don't know yet.
+ */
+function matchReason(c: Recommendation): string {
+	const hit = CHIPS.filter(([, key]) => c[key]).map(([label]) => label.toLowerCase());
+	const miss = CHIPS.filter(([, key]) => !c[key]).map(([label]) => label.toLowerCase());
+	if (miss.length === 0) return 'Matches every dimension of your thesis.';
+	if (hit.length === 0) return 'Doesn’t match your thesis dimensions yet.';
+	const rest = listOf(miss);
+	return `Matches your ${listOf(hit)}. ${rest[0].toUpperCase()}${rest.slice(1)} ${miss.length === 1 ? 'is' : 'are'} not confirmed.`;
+}
+
 export function Recommended() {
 	const { data, isLoading, error } = useSWR<{ data: Recommendation[] }>(qk.scout.recommended({ limit: 24 }));
 	// Recommending against a thesis that does not exist is meaningless, so this
@@ -147,7 +164,7 @@ export function Recommended() {
 										)}
 									</div>
 									<p className="atlas-rec__reason">
-										Matches {CHIPS.filter(([, key]) => c[key]).length} of {CHIPS.length} thesis dimensions{c.match_activity ? ' · in line with your recent activity' : ''}.
+										{matchReason(c)}{c.match_activity ? ' In line with your recent activity.' : ''}
 									</p>
 								</div>
 

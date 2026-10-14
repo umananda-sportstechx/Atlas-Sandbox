@@ -25,7 +25,7 @@ export function Seg<T extends string>({ options, value, onChange, ariaLabel, 'da
 	return (
 		<div className="atlas-seg" role="group" aria-label={ariaLabel} data-tour={dataTour}>
 			{options.map((o) => (
-				<button key={o.key} type="button" className={cx('atlas-seg__btn', o.key === value && 'active')} aria-pressed={o.key === value} onClick={() => onChange(o.key)}>{o.label}</button>
+				<button key={o.key} type="button" data-key={o.key} className={cx('atlas-seg__btn', o.key === value && 'active')} aria-pressed={o.key === value} onClick={() => onChange(o.key)}>{o.label}</button>
 			))}
 		</div>
 	);

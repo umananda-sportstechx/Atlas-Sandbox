@@ -1,18 +1,18 @@
-# Walk the Pitch (practice mode)
+# The Warm-Up (practice mode)
 
-Lets a free (Explore) user see **Raise** or **Scout** in action before buying: a short guided tour over the real product UI with sample data, then the same workspace in view-only practice mode. No time limit; the tour can be replayed any time.
+Lets a visitor see **Raise** or **Scout** in action before buying: The Warm-Up, a short guided demo over the real product UI with sample data, ending in sign up or replay. No time limit; it can be replayed any time.
 
 **Front end only.** Nothing changes on the server: the user stays on Explore there. Practice only changes what the browser shows and which requests it answers itself.
 
 ## Entry points
 
-All are labelled "Walk the pitch →" (or "Walk the pitch first"). They are shown only to real Explore users (`getRealUserType() === 'explore'`) and never while practice is already running (`usePracticeAccess().canEnter`, `components/features/walkthrough/use-practice-access.ts`).
+All are labelled "Try the Warm-Up →" (or "Try the Warm-Up first"). They are shown only to real Explore users (`getRealUserType() === 'explore'`) and never while practice is already running (`usePracticeAccess().canEnter`, `components/features/walkthrough/use-practice-access.ts`).
 
 | Where | Component |
 |---|---|
 | Explore Home: a one-time chooser modal ("Raising capital" → Raise, "Investing" → Scout; seen-flag `stx:walkthrough:welcome-seen`) and a permanent card in "What needs your attention" that reopens it | `walkthrough-home-entry.tsx`, rendered by `components/explore/explore-home.tsx` |
 | Explore sidebar upgrade cards: one link per product | `components/explore/upgrade-cards.tsx` |
-| Locked-page upsell (`TierGate`): secondary "Walk the pitch first" for the page's product | `components/features/tier-gate/tier-gate.tsx` |
+| Locked-page upsell (`TierGate`): secondary "Try the Warm-Up first" for the page's product | `components/features/tier-gate/tier-gate.tsx` |
 | Plans page, and the post-signup plan chooser (which first settles the account on Explore via `beforeStart`) | `WalkthroughButton` in `plans.tsx` / `paywall-gate.tsx` |
 
 Every entry calls `enterPractice(product, source)` (`practice-actions.ts`): it resets the product's sample data, sets the tour's step 0 and does a full page load to Home.
@@ -35,23 +35,27 @@ Entering, replaying and leaving always do a full page load (`practice-actions.ts
 
 While practice is on:
 - **Tier switch.** `getUserType()` (`hooks/use-user-profile.ts`) returns the practice product instead of `explore`, so nav, page gates and features follow it. `getRealUserType()` still gives the real plan (Plans, Billing, the plan chooser and every entry point use it).
-- **Practice bar** (`components/features/walkthrough/practice-bar.tsx`, above the navbar). Tour phase: "Walk the Pitch · X" + Exit. View phase: "Practice mode · view only" + Replay tour + Get Atlas X + Exit.
+- **Practice bar** (`components/features/walkthrough/practice-bar.tsx`, above the navbar). Tour phase: "The Warm-Up · X", "Explore with sample data. No account required." + Exit. View phase: "Practice mode · view only" + Replay tour + Get Atlas X + Exit.
 - **Coach** (`walkthrough-coach.tsx`, mounted by `AppShell` in the tour phase only).
 
 ## The tour engine
 
 Tours are data: `lib/sandbox/tours/raise-tour.ts` and `scout-tour.ts` (types in `tour-types.ts`), picked by product in `components/features/walkthrough/tours.ts`.
 
-1. **Intro** card (Start / Skip tour), then each **step**, then the **finale** (Get Atlas X → exits practice and opens Plans; Keep exploring (view-only) → `finishTour()`; Replay).
-2. **Opening a step.** The coach navigates to `step.path` unless the current pathname already matches it. A path with `:params` (e.g. `/companies/:slug`) is never navigated to; the previous step's advance brings the user there.
-3. **Spotlight.** The element `[data-tour="<target>"]` gets a ring and the rest of the page is faded (`use-tour-target.ts`). The coach waits up to 5s for it to render, scrolls it into view and follows it on scroll, resize and re-render. If it never appears, the step still shows, with a Next button.
-4. **Advancing** (`use-tour-advance.ts`):
-   - `next`: the Next button (or Enter).
-   - `click`: a click (or change, for a select) on or inside the target.
+It is a **guided demo, not a sandbox**: at each step only the highlighted element can be used.
+
+1. **Welcome** screen (numbered step 1: Start Warm-Up / Skip tour), then each **step**, then the **completion screen** — Get Atlas X (exits practice; signup in preview, Plans in the app) or Replay Warm-Up. There is no free exploring after it. A `continues` step shares the number before it (Scout's board toggle + stage move are one step).
+2. **Opening a step.** The coach navigates to `step.path` unless the current pathname already matches it. Prefer concrete paths (Scout's are pinned to Fanfold, the Pitch-side shortlist and the featured deal). A `:params` path is reached by the previous step's own navigation; the URL it ran on is recorded (`recordStepPath`) so Back can reopen it.
+3. **Guard** (`use-tour-guard.ts`). Every click, tap, key press and form submit outside the step's target is swallowed before the app sees it. `only` narrows the usable part of a big target (a card whose "View profile" link is the action); `allow` adds the popover option a step permits (the shortlist in the watchlist menu, "Reviewing" in the stage menu); `pointerOnly` blocks keys on the target too. The coach panel, the practice bar (Exit) and `.wt-allow` always work. Chat, Signals and the Deck Screener are therefore unreachable.
+4. **Dim + highlight** (`use-tour-target.ts`, `walkthrough-coach.tsx`). The page is dimmed with a clear cut-out, border and soft pulsing glow around the target, any `allow`ed element on screen, and any orientation `highlights` (adjacent ones merge into one block). The coach waits up to 5s for the target, scrolls it into view and follows it on scroll, resize and re-render. If it never appears, the step still shows, with a Next button. `expandNav` shows the sidebar expanded (the orientation step); `confirm` shows a simulated confirmation card instead of a real action.
+5. **Advancing** (`use-tour-advance.ts`):
+   - `next`: the panel button (labelled by `cta`, default Next) or Enter.
+   - `click`: a click (or change, for a select) on or inside the target, or inside `on` when given. `simulate` swallows the click so the app never acts on it (Request introduction).
    - `request`: the interceptor fires `stx:practice-request` (`events.ts`) with `{ method, path }` after every `/api/*` request; the step advances on a method + pattern match.
    - `path`: the pathname comes to match the pattern (after not matching, so stepping Back onto a matching page doesn't skip ahead).
-5. **Controls.** Back (Escape), Skip tour (→ view phase), "Need a hand?" (email). Enter triggers Next on Next steps, never while typing or with another dialog open. Docked right on desktop, a bottom sheet at ≤1024px.
-6. **Analytics** (`lib/analytics`, no-op without a Mixpanel token): `walkthrough:<product>:start`, `walkthrough:<product>:<stepId>:done`, `walkthrough:<product>:<stepId>:skip`, `walkthrough:<product>:finish` (with `choice`), `walkthrough:<product>:replay`.
+   - `pause` holds the page a moment after the step is done, so its result is seen.
+6. **Controls.** Back (Escape) reopens the previous step's page with the sample data as it was then (`saveStepSnapshot` / `restoreStepSnapshot`, then every SWR key refetches). Skip tour → the completion screen. "Need a hand?" (email). Enter triggers the primary action, never while typing or with another dialog open. Docked right on desktop, a bottom sheet at ≤1024px.
+7. **Analytics** (`lib/analytics`, no-op without a Mixpanel token): `walkthrough:<product>:start`, `walkthrough:<product>:<stepId>:done`, `walkthrough:<product>:<stepId>:skip`, `walkthrough:<product>:finish` (with `choice`), `walkthrough:<product>:replay`.
 
 ### Adding or editing a step
 
@@ -92,7 +96,7 @@ A locked action returns `gated()` (a 402 `TIER_REQUIRED`), which opens the app's
 
 ## Pre-signup preview (`app/preview/`)
 
-The same tour, same pages, same coach — reachable with **no session at all**, linked from the public landing page's "Walk the Pitch" CTAs. `/preview` is a product chooser; picking one calls the same `enterPractice()` as every other entry point, just landing on `/preview/<product>/home` instead of the real `/home`.
+The same tour, same pages, same coach — reachable with **no session at all**, linked from the public landing page's "The Warm-Up" CTAs. `/preview` is a product chooser; picking one calls the same `enterPractice()` as every other entry point, just landing on `/preview/<product>/home` instead of the real `/home`.
 
 ```
 /preview                        → app/preview/page.tsx (chooser)

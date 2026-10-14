@@ -55,8 +55,8 @@ function isViewBlocked(method: string, pathname: string): boolean {
 	return !VIEW_ALLOWED.some(([m, p]) => m === method && matchPath(p, pathname));
 }
 
-function notify(method: string, path: string) {
-	window.dispatchEvent(new CustomEvent<PracticeRequestDetail>(PRACTICE_REQUEST_EVENT, { detail: { method, path } }));
+function notify(method: string, path: string, init?: RequestInit) {
+	window.dispatchEvent(new CustomEvent<PracticeRequestDetail>(PRACTICE_REQUEST_EVENT, { detail: { method, path, body: parseBody(init) } }));
 }
 
 function parseBody(init?: RequestInit): unknown {
@@ -117,7 +117,7 @@ export function installSandboxInterceptor() {
 		// call, so answer every /api with an empty list instead of a 404.
 		if (!product || !isSandboxEligible()) {
 			const res = await emptyApi();
-			notify(method, url.pathname);
+			notify(method, url.pathname, init);
 			return res;
 		}
 
@@ -132,7 +132,7 @@ export function installSandboxInterceptor() {
 				? gated(product, `That's not part of the practice run — get Atlas ${PRODUCT_NAME[product]} to do this for real.`)
 				: await emptyApi());
 		}
-		notify(method, url.pathname);
+		notify(method, url.pathname, init);
 		return res;
 	};
 }

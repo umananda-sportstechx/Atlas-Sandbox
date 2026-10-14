@@ -41,7 +41,7 @@ export const FIGMA_ICONS: Record<string, FigmaIconDef> = {
 	},
 	'nav-events': {
 		viewBox: '0 0 24 24', w: 24, h: 24,
-		paint: <g fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">{[<path key={0} d="M5 8h14v2.5a1.5 1.5 0 0 0 0 3V16H5v-2.5a1.5 1.5 0 0 0 0-3z" />, <path key={1} d="M14 8v8" stroke-dasharray="1.2 1.4" />]}</g>,
+		paint: <g fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">{[<path key={0} d="M5 8h14v2.5a1.5 1.5 0 0 0 0 3V16H5v-2.5a1.5 1.5 0 0 0 0-3z" />, <path key={1} d="M14 8v8" strokeDasharray="1.2 1.4" />]}</g>,
 	},
 	'nav-framework': {
 		viewBox: '-0.5 -0.5 13 13', w: 13, h: 13,

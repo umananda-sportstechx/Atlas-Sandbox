@@ -169,13 +169,9 @@ async function handleResponse(res: Response, context?: string): Promise<void> {
   // Every 403 this API returns carries a domain code (SCOUT_NOT_SET_UP,
   // TIER_LOCKED, NO_RAISE, NOT_ELIGIBLE, UPGRADE_REQUIRED, …) and not one of
   // them means "your session expired". Do not put 403 back.
-  if (res.status === 401 && !logoutState.isLoggingOut()) {
-    if (logoutState.hasValidSession() && !noRedirectHere()) {
-      setTimeout(() => {
-        window.location.href = '/login?reason=session_expired';
-      }, 1500);
-    }
-  }
+  // Standalone demo: never bounce to /login. There is no auth and no backend —
+  // a 401 just means an unhandled mock request; swallow it, don't navigate.
+  void noRedirectHere;
 
   // A 402 is one of two refusals: out of credits, or the plan doesn't include
   // this. Both pop a global modal and throw a typed error so callers can skip

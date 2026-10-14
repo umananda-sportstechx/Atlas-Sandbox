@@ -27,7 +27,8 @@ export function useLogout(): { logout: () => Promise<void>; signingOut: boolean 
 		try {
 			track(Events.signedOut);
 			await getSupabaseBrowser().auth.signOut();
-			router.push('/login');
+			// Demo has no auth — return to the tour chooser, never a login page.
+			router.push('/preview');
 		} catch { setSigningOut(false); }
 	};
 

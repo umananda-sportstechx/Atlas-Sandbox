@@ -2,10 +2,10 @@
 
 import { useEffect } from 'react';
 
-/** The demo lives at /sandbox; the root just forwards there. */
+/** The demo lives at /preview; the root just forwards there. */
 export default function Home() {
   useEffect(() => {
-    window.location.replace(`/sandbox${window.location.search || '?step=0'}`);
+    window.location.replace(`/preview${window.location.search || '?step=0'}`);
   }, []);
   return null;
 }

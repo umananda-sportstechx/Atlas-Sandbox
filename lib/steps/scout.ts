@@ -4,8 +4,8 @@ import type { Tour } from '@/lib/types';
 export const scoutTour: Tour = {
   tier: 'scout',
   intro: {
-    title: 'Welcome to your scouting desk',
-    body: 'You’re Jordan Ellis, a partner backing seed-to-Series-A sports tech across Europe. Let’s go find your next deal.',
+    title: 'Welcome to Kestrel Field Ventures',
+    body: 'You are Jordan Ellis, a partner backing seed to Series A sports tech across Europe. Your thesis is set, so let’s go and find your next deal.',
   },
   steps: [
     { id: 'home', screen: 'home', title: 'Fresh matches this week', body: 'Atlas scores new companies against your thesis. This is the first thing you see each morning.', spotlight: 'matches-card' },
@@ -19,7 +19,7 @@ export const scoutTour: Tour = {
     { id: 'deck', screen: 'deck', title: 'Screen a deck in minutes', body: 'Atlas reads a pitch deck and scores it section by section, so you triage faster.', spotlight: 'deck-open' },
   ],
   finale: {
-    title: 'That’s the Scout play',
-    body: 'Matches, watchlists, signals, deal flow and deck screening — all on your own thesis, with real intros to founders in Atlas Scout.',
+    title: 'Warm-up complete',
+    body: 'You ran the full Scout play: matches, watchlists, signals, deal flow and deck screening. With Atlas Scout it runs on your own thesis, with real introductions to founders.',
   },
 };

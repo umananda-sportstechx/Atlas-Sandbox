@@ -4,9 +4,10 @@ import { cookies } from 'next/headers';
 export async function createClient() {
   const cookieStore = await cookies();
 
+  // Standalone demo: inert placeholders, no env, no real backend. See client.ts.
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    'https://demo.invalid',
+    'public-anon-demo-key',
     {
       cookies: {
         getAll() {
